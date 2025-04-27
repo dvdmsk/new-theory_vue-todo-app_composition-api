@@ -1,5 +1,5 @@
 {
-  "name": "vue-todo-app",
+  "name": "new-theory_vue-todo-app_composition-api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
+    "sass": "^1.87.0",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"
   }
