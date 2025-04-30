@@ -14,7 +14,7 @@ const { status } = defineProps({
       href="#/"
       class="filter__link"
       :class="{ selected: status === 'all' }"
-      @click.prevent="emit('change', 'all')"
+      @click="emit('change', 'all')"
     >
       All
     </a>
@@ -22,7 +22,7 @@ const { status } = defineProps({
       href="#/active"
       class="filter__link"
       :class="{ selected: status === 'active' }"
-      @click.prevent="emit('change', 'active')"
+      @click="emit('change', 'active')"
     >
       Active
     </a>
@@ -30,7 +30,7 @@ const { status } = defineProps({
       href="#/completed"
       class="filter__link"
       :class="{ selected: status === 'completed' }"
-      @click.prevent="emit('change', 'completed')"
+      @click="emit('change', 'completed')"
     >
       Completed
     </a>
