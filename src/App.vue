@@ -1,39 +1,60 @@
 <script setup>
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import originalTodos from "./data/todos";
 import StatusFilter from "./components/StatusFilter.vue";
 import TodoItem from "./components/TodoItem.vue";
+import * as todoApi from "./api/todos";
+import Message from "./components/Message.vue";
 
 const todos = ref([]);
+const errorMessage = ref(null);
 
-onBeforeMount(() => {
+onMounted(async () => {
   try {
-    todos.value = JSON.parse(localStorage.getItem("todos"));
-  } catch (error) {}
-
-  if (!Array.isArray(todos.value)) {
-    todos.value = [];
+    todos.value = await todoApi.getTodos();
+  } catch (error) {
+    errorMessage.value.show('Unable to load todos');
   }
 });
 
 const title = ref("");
-function addTodo() {
-  if (!title.value) {
-    errorMessage.value = "Title should not be empty";
 
+const addTodo = async () => {
+  if (!title.value) {
+    errorMessage.value.show("Title should not be empty");
     return;
   }
 
-  todos.value.push({
-    id: Date.now(),
-    title: title.value,
-    completed: false,
-  });
+  try {
+    const newTodo = await todoApi.createTodo(title.value);
 
-  title.value = "";
-}
+    todos.value.push(newTodo);
+    title.value = "";
+  } catch (error) {
+    errorMessage.value.show("Unable to add a todo");
+  }
+};
 
-const errorMessage = ref("");
+const deleteTodo = async (todoId) => {
+  try {
+    await todoApi.deleteTodo(todoId);
+    todos.value = todos.value.filter((todo) => todoId !== todo.id);
+  } catch (error) {
+    errorMessage.value.show("Unable to delete a todo");
+  }
+};
+
+const updateTodo = async ({ id, title, completed }) => {
+  try {
+    const updatedTodo = await todoApi.updateTodo({ id, title, completed });
+    const currentTodo = todos.value.find((todo) => todo.id === id);
+
+    Object.assign(currentTodo, updatedTodo);
+  } catch (error) {
+    errorMessage.value.show("Unable to update a todo");
+  }
+};
+
 const activeTodos = computed(() =>
   todos.value.filter((todo) => !todo.completed)
 );
@@ -50,14 +71,6 @@ const visibleTodos = computed(() => {
 
   return todos.value;
 });
-
-watch(
-  todos,
-  (newTodos) => {
-    localStorage.setItem("todos", JSON.stringify(newTodos));
-  },
-  { deep: true }
-);
 </script>
 
 <template>
@@ -81,20 +94,22 @@ watch(
             class="todoapp__new-todo"
             placeholder="What needs to be done?"
             v-model="title"
-            @input="errorMessage = ''"
           />
         </form>
       </header>
 
-      <section class="todoapp__main" data-cy="TodoList">
-        <TodoItem
+      <TransitionGroup
+        tag="section"
+        name="todolist"
+        class="todoapp__main"
+        v-if="todos.length > 0"
+        ><TodoItem
           v-for="todo of visibleTodos"
           :key="todo.id"
           :todo="todo"
-          @delete="todos.splice(todos.indexOf(todo), 1)"
-          @update="todos[todos.indexOf(todo)] = $event"
-        />
-      </section>
+          @delete="deleteTodo(todo.id)"
+          @update="updateTodo($event)"
+      /></TransitionGroup>
 
       <!-- Hide the footer if there are no todos -->
       <footer class="todoapp__footer" data-cy="Footer">
@@ -117,13 +132,21 @@ watch(
     <!-- DON'T use conditional rendering to hide the notification -->
     <!-- Add the 'hidden' class to hide the message smoothly -->
 
-    <div
-      v-if="errorMessage"
-      class="notification is-danger is-light has-text-weight-normal"
-    >
-      <button class="delete" @click="errorMessage = ''"></button>
+    <Message class="is-danger" ref="errorMessage"></Message>
 
-      {{ errorMessage }}
-    </div>
   </div>
 </template>
+
+<style scoped>
+.todolist-enter-active,
+.todolist-leave-active {
+  max-height: 60px;
+  transition: all 0.5s ease;
+}
+.todolist-enter-from,
+.todolist-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0);
+}
+</style>

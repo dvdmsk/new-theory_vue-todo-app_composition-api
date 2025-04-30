@@ -1,32 +1,74 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { ref, nextTick, defineProps, defineEmits } from "vue";
 
-const { todo } = defineProps(["todo"]);
+
+const props = defineProps(['todo']);
+
 const emit = defineEmits(["delete"]);
+
+const editing = ref(false);
+const titleField = ref(null);
+const newTitle = ref(props.todo.title);
+
+const startEditing = async () => {
+  newTitle.value = props.todo.title;
+  editing.value = true;
+
+  await nextTick();
+
+  if (titleField.value) {
+    titleField.value.focus();
+  }
+};
+
+
+const rename = () => {
+  if (!editing.value) return;
+
+  editing.value = false;
+
+  if (newTitle.value === props.todo.title) {
+    return;
+  }
+
+  if (!newTitle.value) {
+    emit('delete');
+    return;
+  }
+
+  emit('update', { ...props.todo, title: newTitle.value });
+};
+
+
 
 </script>
 
 <template>
-  <div class="todo" :class="{ completed: todo.completed }">
+  <div class="todo" :class="{ completed: props.todo.completed }">
     <label class="todo__status-label">
       <input
         type="checkbox"
         class="todo__status"
-        :checked="todo.completed"
-        @change="emit('update', { ...todo, completed: !todo.completed })"
+        :checked="props.todo.completed"
+        @change="emit('update', { ...props.todo, completed: !props.todo.completed })"
       />
     </label>
 
     <!-- show when todo is being edited -->
-    <form v-if="false">
+    <form v-if="editing" @submit.prevent="rename">
       <input
+        ref="titleField"
+        v-model.trim="newTitle"
         class="todo__title-field"
         placeholder="Empty todo will be deleted"
+        @keyup.escape="editing = false"
+        @blur="rename"
       />
     </form>
 
     <template v-else>
-      <span class="todo__title">{{ todo.title }}</span>
+      <span class="todo__title" @dblclick="startEditing">{{ props.todo.title }}</span>
+
       <button class="todo__remove" @click="emit('delete')">×</button>
     </template>
 
@@ -36,4 +78,4 @@ const emit = defineEmits(["delete"]);
       <div class="loader"></div>
     </div>
   </div>
-</template> 
+</template>
