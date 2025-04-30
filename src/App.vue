@@ -2,6 +2,7 @@
 import { computed, onBeforeMount, ref, watch } from "vue";
 import originalTodos from "./data/todos";
 import StatusFilter from "./components/StatusFilter.vue";
+import TodoItem from "./components/TodoItem.vue";
 
 const todos = ref([]);
 
@@ -86,38 +87,12 @@ watch(
       </header>
 
       <section class="todoapp__main" data-cy="TodoList">
-        <div
-          v-for="(todo, i) of visibleTodos"
+        <TodoItem
+          v-for="todo of visibleTodos"
           :key="todo.id"
-          class="todo"
-          :class="{ completed: todo.completed }"
-        >
-          <label class="todo__status-label">
-            <input
-              type="checkbox"
-              class="todo__status"
-              :checked="todo.completed"
-              @change="todo.completed = !todo.completed"
-            />
-          </label>
-
-          <form v-if="false">
-            <input
-              class="todo__title-field"
-              placeholder="Empty todo will be deleted"
-            />
-          </form>
-
-          <template v-else>
-            <span class="todo__title">{{ todo.title }}</span>
-            <button class="todo__remove" @click="todos.splice(i, 1)">×</button>
-          </template>
-
-          <div class="modal overlay" :class="{ 'is-active': false }">
-            <div class="modal-background has-background-white-ter"></div>
-            <div class="loader"></div>
-          </div>
-        </div>
+          :todo="todo"
+          @delete="todos.splice(todos.indexOf(todo), 1)"
+        />
       </section>
 
       <!-- Hide the footer if there are no todos -->
@@ -125,7 +100,7 @@ watch(
         <span class="todo-count">{{ activeTodos.length }} items left</span>
 
         <!-- Active link should have the 'selected' class -->
-        <StatusFilter :status="status" @change="status = $event" />
+        <StatusFilter :status="status" v-model="status" />
 
         <!-- this button should be disabled if there are no completed todos -->
         <button

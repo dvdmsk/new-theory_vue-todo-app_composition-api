@@ -1,11 +1,9 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["update:modelValue"]);
+const { modelValue } = defineProps({ modelValue: String });
 
-const { status } = defineProps({
-  status: String,
-});
 </script>
 
 <template>
@@ -13,24 +11,24 @@ const { status } = defineProps({
     <a
       href="#/"
       class="filter__link"
-      :class="{ selected: status === 'all' }"
-      @click="emit('change', 'all')"
+      :class="{ selected: modelValue === 'all' }"
+      @click="emit('update:modelValue', 'all')"
     >
       All
     </a>
     <a
       href="#/active"
       class="filter__link"
-      :class="{ selected: status === 'active' }"
-      @click="emit('change', 'active')"
+      :class="{ selected: modelValue === 'active' }"
+      @click="emit('update:modelValue', 'active')"
     >
       Active
     </a>
     <a
       href="#/completed"
       class="filter__link"
-      :class="{ selected: status === 'completed' }"
-      @click="emit('change', 'completed')"
+      :class="{ selected: modelValue === 'completed' }"
+      @click="emit('update:modelValue', 'completed')"
     >
       Completed
     </a>
