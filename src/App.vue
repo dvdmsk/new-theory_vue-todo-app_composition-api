@@ -92,6 +92,7 @@ watch(
           :key="todo.id"
           :todo="todo"
           @delete="todos.splice(todos.indexOf(todo), 1)"
+          @update="todos[todos.indexOf(todo)] = $event"
         />
       </section>
 

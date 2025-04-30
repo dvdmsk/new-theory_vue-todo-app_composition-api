@@ -1,14 +1,20 @@
 <script setup>
-  import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from "vue";
 
-  const { todo } = defineProps(['todo']);
-  const emit = defineEmits(['delete']);
+const { todo } = defineProps(["todo"]);
+const emit = defineEmits(["delete"]);
+
 </script>
 
 <template>
   <div class="todo" :class="{ completed: todo.completed }">
     <label class="todo__status-label">
-      <input type="checkbox" class="todo__status" v-model="todo.completed" />
+      <input
+        type="checkbox"
+        class="todo__status"
+        :checked="todo.completed"
+        @change="emit('update', { ...todo, completed: !todo.completed })"
+      />
     </label>
 
     <!-- show when todo is being edited -->
