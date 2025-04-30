@@ -36,4 +36,4 @@ const emit = defineEmits(["delete"]);
       <div class="loader"></div>
     </div>
   </div>
-</template>
+</template> 
